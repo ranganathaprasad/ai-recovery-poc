@@ -232,6 +232,48 @@ LIMIT 2;
 ### New tables to create
 
 ```sql
+CREATE TABLE public.patient_recovery_logs (
+	id serial4 NOT NULL,
+	patient_id int4 NOT NULL,
+	procedure_type varchar(100) NOT NULL,
+	age int4 NULL,
+	gender varchar(10) NULL,
+	program_start_date date NOT NULL,
+	program_end_date date NULL,
+	is_program_incomplete bool DEFAULT false NULL,
+	week_number int4 NOT NULL,
+	record_date date NOT NULL,
+	rom_percent float8 NULL,
+	pain_score int4 NULL,
+	walking_steps int4 NULL,
+	exercise_adherence float8 NULL,
+	survey_completed bool NULL,
+	created_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	program_id int4 NOT NULL,
+	CONSTRAINT chk_adherence CHECK (((exercise_adherence >= (0)::double precision) AND (exercise_adherence <= (100)::double precision))),
+	CONSTRAINT chk_pain_score CHECK (((pain_score >= 0) AND (pain_score <= 10))),
+	CONSTRAINT chk_program_week CHECK ((week_number > 0)),
+	CONSTRAINT chk_rom_percent CHECK (((rom_percent >= (0)::double precision) AND (rom_percent <= (100)::double precision))),
+	CONSTRAINT chk_week_number CHECK ((week_number > 0)),
+	CONSTRAINT patient_recovery_logs_pkey PRIMARY KEY (id),
+	CONSTRAINT unique_program_week UNIQUE (program_id, week_number)
+);
+CREATE INDEX idx_patient_id ON public.patient_recovery_logs USING btree (patient_id);
+CREATE INDEX idx_patient_week ON public.patient_recovery_logs USING btree (patient_id, week_number);
+CREATE INDEX idx_procedure ON public.patient_recovery_logs USING btree (procedure_type);
+```
+
+```sql
+CREATE TABLE public.patients (
+	id serial4 NOT NULL,
+	"name" varchar(100) NOT NULL,
+	height float8 NULL,
+	gender varchar(20) NULL,
+	CONSTRAINT patients_pkey PRIMARY KEY (id)
+);
+```
+
+```sql
 -- Store prediction results
 CREATE TABLE prediction_logs (
   id SERIAL PRIMARY KEY,
