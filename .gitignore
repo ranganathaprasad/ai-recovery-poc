@@ -1,5 +1,8 @@
 # Node modules
 node/node_modules/
 
+# react node modules
+client/node_modules/
+
 # Python models
 python/models/

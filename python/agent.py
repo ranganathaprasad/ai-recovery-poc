@@ -133,14 +133,15 @@ def call_ollama(prompt: str) -> dict:
     )
 
     try:
-        with urllib.request.urlopen(req, timeout=360) as resp:
+        with urllib.request.urlopen(req, timeout=720) as resp:
             result  = json.loads(resp.read().decode("utf-8"))
             content = result["message"]["content"].strip()
 
-            # Strip markdown fences if model wraps in ```json
-            if content.startswith("```"):
-                lines   = content.split("\n")
-                content = "\n".join(lines[1:-1]).strip()
+            content = clean_json_response(content)
+
+            json_match = re.search(r'\{.*\}', content, re.DOTALL)
+            if json_match:
+                content = json_match.group(0)
 
             parsed = json.loads(content)
             # Apply guardrail enforcement on top of LLM output

@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
       SELECT
         p.id                    AS patient_id,
         p.name,
-        p.age,
+        prl.age,
         p.gender,
         prl.procedure_type,
         prl.week_number         AS current_week,

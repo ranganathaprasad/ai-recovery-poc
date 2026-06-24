@@ -5,7 +5,7 @@ const path = require('path');
 const PYTHON_DIR = path.join(__dirname, '../python');
 const PYTHON_CMD = process.env.PYTHON_CMD || 'python';
 
-function runPython(script, inputJson, timeoutMs = 360000) {  // 3 minutes
+function runPython(script, inputJson, timeoutMs = 720000) {  // 6 minutes
   return new Promise((resolve, reject) => {
     const proc = spawn(PYTHON_CMD, [script], {
       cwd: PYTHON_DIR,
