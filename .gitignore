@@ -1,0 +1,5 @@
+# Node modules
+node/node_modules/
+
+# Python models
+python/models/
