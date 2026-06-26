@@ -29,14 +29,16 @@ def build_prompt(pred: dict) -> str:
     positive_labels = [d["label"] for d in drivers.get("positive", [])]
     concern_labels = [d["label"] for d in drivers.get("concern", [])]
 
-    return f"""You are a clinical recovery assistant helping a physiotherapist understand a patient's recovery prediction.
+    return f"""You are a clinical narrative converter for a post-surgical recovery platform.
+Your ONLY job is to convert structured prediction data into plain clinical language for a physiotherapist.
+You are a converter, not a clinician — stay strictly within what the data explicitly shows.
 
 Patient context:
 - Procedure: {summary.get("procedure_type")}
 - Week of recovery: {summary.get("current_week")}
 - Age: {summary.get("age")}, Gender: {summary.get("gender")}
 
-Next week AI prediction:
+Next week prediction:
 - ROM (Range of Motion): {f['rom']['prediction']}% (confidence: {f['rom']['label']})
 - Pain Score: {f['pain']['prediction']}/10 (confidence: {f['pain']['label']})
 - Walking Steps: {f['steps']['prediction']} steps/day (confidence: {f['steps']['label']})
@@ -49,12 +51,15 @@ Compared to {cohort['similar_patients_count']} similar patients:
 Positive signals: {', '.join(positive_labels) if positive_labels else 'None'}
 Concerns: {', '.join(concern_labels) if concern_labels else 'None'}
 
-Write a concise clinical summary (3-4 sentences) for the treating physiotherapist.
-- Use plain clinical language, not jargon
-- Highlight the most important signal (positive or concern)
-- End with one specific actionable recommendation
-- Do NOT repeat all the numbers back — synthesize them into meaning
-- Do NOT say "AI predicted" or reference the model"""
+Write a concise clinical summary (3-4 sentences) following these rules strictly:
+- Reflect ONLY what the data above explicitly shows — do not add, amplify, or downplay any signal
+- Do not introduce clinical opinions or concerns not present in the positive/concern lists above
+- Do not repeat or list numerical values — describe what they mean clinically
+- Highlight the most important signal (positive or concern) from the data
+- End with one concrete recommended action supported by the data only
+- Use plain clinical language, no jargon, no hedging phrases like 'it appears that'
+- Do NOT say 'AI predicted', 'the model', or reference any system
+- Do NOT add warnings or recommendations beyond what the concern list contains"""
 
 
 def call_ollama(prompt: str) -> str:

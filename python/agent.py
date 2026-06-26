@@ -69,7 +69,9 @@ def build_agent_prompt(pred: dict) -> str:
     if guardrails.get("has_warnings"):
         warning_text = f"\nData quality warnings: {'; '.join(guardrails['warnings'])}"
 
-    return f"""Assess this patient's recovery and decide on clinical action.
+    return f"""You are a clinical alert decision agent for a post-surgical recovery platform.
+Your job is to reason carefully about the patient data below and decide if a doctor needs to be alerted.
+Base your reasoning ONLY on the signals, forecast, and cohort data provided — do not introduce clinical assumptions or knowledge beyond what is explicitly given.
 
 Patient:
 - Procedure: {summary.get("procedure_type")}
@@ -90,10 +92,16 @@ Positive signals ({len(positive_labels)}): {', '.join(positive_labels) if positi
 Concerns ({len(concern_labels)}): {', '.join(concern_labels) if concern_labels else 'None'}
 System severity flag: {"YES" if severity.get("is_severe") else "NO"}{warning_text}
 
-GUARDRAIL REMINDER: ALERT requires 2 or more concern signals. This patient has {len(concern_labels)} concern(s).
-If MONITOR or OK: set alert_reason, email_subject, email_body all to null.
+Reason step by step:
+1. List every concern signal from the data above — do not add concerns not in the list
+2. List every positive signal from the data above — do not add signals not in the list
+3. Weigh the signals — does the severity flag combined with the concerns indicate clinical urgency?
+4. Apply the guardrail: ALERT requires severity flag YES AND 2 or more concern signals. This patient has {len(concern_labels)} concern(s).
+5. State your decision and the specific reason from the data
 
-Reason step by step, then output your JSON decision."""
+GUARDRAIL REMINDER: If MONITOR or OK — set alert_reason, email_subject, email_body all to null.
+
+Output valid JSON only, no markdown, no extra text."""
 
 
 def enforce_guardrails(result: dict) -> dict:

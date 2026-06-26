@@ -186,6 +186,9 @@ router.post('/full/:patientId', async (req, res) => {
 
     // Handle ALERT
     if (agent.decision === 'ALERT') {
+      agent.email_sent      = true;
+      agent.email_message_id = Date.now();
+      
       // await saveAlert(req.db, input, agent);
 
       // try {
